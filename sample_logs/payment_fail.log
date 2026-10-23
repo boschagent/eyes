@@ -1,0 +1,12 @@
+frontend-1  | 2026-10-23T12:01:02.113Z GET /api/checkout 200 41ms
+checkout-1  | 2026-10-23T12:01:03.201Z ERROR failed to charge card: rpc error: code = Internal desc = payment request failed
+payment-1   | 2026-10-23T12:01:03.190Z ERROR Charge failed for user 3f2a9c1e-1b2d-4c3e-8f90-a1b2c3d4e5f6 card 4111 1111 1111 1111 token=abc123secret
+payment-1   | 2026-10-23T12:01:04.220Z ERROR Charge failed for user 9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d email bob@example.com
+payment-1   | 2026-10-23T12:01:05.310Z ERROR Charge failed for user 11111111-2222-4333-8444-555555555555 api_key: sk-live-XYZ
+checkout-1  | 2026-10-23T12:01:05.350Z ERROR failed to charge card: rpc error: code = Internal desc = payment request failed
+cart-1      | 2026-10-23T12:01:06.000Z INFO added item 42 to cart for session 8f14e45fceea167a5a36dedd4bea2543
+frontend-1  | 2026-10-23T12:01:06.410Z POST /api/checkout 500 120ms
+frontend-1  | 2026-10-23T12:01:07.410Z POST /api/checkout 500 118ms
+flagd-1     | 2026-10-23T12:00:59.000Z INFO flag evaluation: paymentFailure variant=on
+payment-1   | 2026-10-23T12:01:07.000Z INFO config loaded: paymentFailure enabled
+recommendation-1 | 2026-10-23T12:01:08.000Z INFO served 5 recommendations in 12ms
