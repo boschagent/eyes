@@ -1,0 +1,59 @@
+# Runbook allowlist: the ONLY actions the agent may ever request.
+# Anything not listed here is rejected before any HTTP call is made.
+#
+# ASSUMPTION: the `api` method/path values below are placeholders until we have the
+# organisers' Action API docs. Only these lines need to change when we do.
+#
+# inverse.params syntax:  "$x" = copy param x,  "!$x" = boolean negation of param x.
+# Actions with `inverse: null` cannot be rolled back automatically -> escalate instead.
+version: 1
+
+denylist_services: [flagd, flagd-ui]   # never act on these (flag leakage / disqualification risk)
+
+actions:
+  restart_service:
+    description: Restart one container/service.
+    risk: low
+    api: {method: POST, path: /actions/restart_service}
+    params:
+      service: {type: str, required: true, pattern: "[a-z0-9][a-z0-9_-]*"}
+    preconditions: [service_not_denied]
+    inverse: null            # a restart cannot be undone -> failure = escalate
+
+  toggle_flag:
+    description: Turn a fault flag off (remedy) or back on (rollback). The flag name must be
+      chosen from telemetry symptoms, never by reading flag state.
+    risk: medium
+    api: {method: POST, path: /actions/toggle_flag}
+    params:
+      flag: {type: str, required: true, pattern: "[A-Za-z0-9_.-]+"}
+      enabled: {type: bool, required: true}
+    preconditions: []
+    inverse:
+      action: toggle_flag
+      params: {flag: "$flag", enabled: "!$enabled"}
+
+  throttle_loadgen:
+    description: Reduce load-generator users (traffic flood remedy).
+    risk: low
+    api: {method: POST, path: /actions/throttle_loadgen}
+    params:
+      users: {type: int, required: true, min: 0, max: 5000}
+      previous_users: {type: int, required: true, min: 0, max: 5000}
+    preconditions: []
+    inverse:
+      action: throttle_loadgen
+      params: {users: "$previous_users", previous_users: "$users"}
+
+  scale_service:
+    description: Change replica count of a service.
+    risk: medium
+    api: {method: POST, path: /actions/scale_service}
+    params:
+      service: {type: str, required: true, pattern: "[a-z0-9][a-z0-9_-]*"}
+      replicas: {type: int, required: true, min: 1, max: 10}
+      previous_replicas: {type: int, required: true, min: 1, max: 10}
+    preconditions: [service_not_denied]
+    inverse:
+      action: scale_service
+      params: {service: "$service", replicas: "$previous_replicas", previous_replicas: "$replicas"}
